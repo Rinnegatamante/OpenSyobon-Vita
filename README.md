@@ -11,3 +11,4 @@ OpenSyobon Vita is a port of Syobon Action (aka NekoMario / CatMario), a frustra
 ## Credits
 
 - nop90 for the 3DS port which i used as base to port it to PSVITA.
+- EasyRPG Team for the audio decoder i used to write the new audio engine.
