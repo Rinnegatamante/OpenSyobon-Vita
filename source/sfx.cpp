@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include <array>
 #include <vitasdk.h>
 #include "sfx.h"
 #include "filesystem.h"

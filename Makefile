@@ -3,10 +3,13 @@ TITLE		:= SYOBONCAT
 SOURCES		:= source
 INCLUDES	:= include
 
-LIBS = -lvorbisfile -lvorbis -logg -lspeexdsp -lvita2d -lvitashaders \
+PKG_CONFIG = arm-vita-eabi-pkg-config
+FREETYPE_LIBS := $(shell $(PKG_CONFIG) --static --libs freetype2)
+
+LIBS = -lvorbisfile -lvorbis -logg -lspeexdsp -lvita2d \
 	-lSceAppMgr_stub -lSceSysmodule_stub -lSceCtrl_stub \
 	-lSceLibKernel_stub -lm -lSceAppUtil_stub -lScePgf_stub \
-	-ljpeg -lfreetype -lc -lScePower_stub -lSceCommonDialog_stub -lpng16 -lz \
+	-ljpeg $(FREETYPE_LIBS) -lc -lScePower_stub -lSceCommonDialog_stub -lpng16 -lz \
 	-lSceAudio_stub -lSceGxm_stub -lSceDisplay_stub
 
 CFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.c))
@@ -24,14 +27,16 @@ ASFLAGS = $(CFLAGS)
 all: $(TARGET).vpk
 
 $(TARGET).vpk: $(TARGET).velf
-	vita-make-fself -s $< .\builder\eboot.bin
-	vita-mksfoex -s TITLE_ID=$(TITLE) "$(TARGET)" param.sfo
-	cp -f param.sfo ./builder/sce_sys/param.sfo
-	cp -f ./builder/eboot.bin eboot.bin
-	
-	#------------ Comment this if you don't have 7zip ------------------
-	7z a -tzip ./$(TARGET).vpk -r .\builder\splash.png .\builder\sce_sys\* .\builder\BGM\* .\builder\SE\* .\builder\res\* .\builder\eboot.bin 
-	#-------------------------------------------------------------------
+	vita-make-fself -s $< builder/eboot.bin
+	vita-mksfoex -s TITLE_ID=$(TITLE) "$(TARGET)" builder/sce_sys/param.sfo
+	cp -f builder/sce_sys/param.sfo param.sfo
+	cp -f builder/eboot.bin eboot.bin
+	vita-pack-vpk -s builder/sce_sys/param.sfo -b builder/eboot.bin \
+		--add builder/sce_sys/icon0.png=sce_sys/icon0.png \
+		--add builder/sce_sys/livearea=sce_sys/livearea \
+		--add builder/splash.png=splash.png \
+		--add builder/BGM=BGM --add builder/SE=SE --add builder/res=res \
+		$@
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
